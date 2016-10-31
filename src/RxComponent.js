@@ -3,7 +3,7 @@ const {Subject} = require('rx');
 
 const _ = require('lodash');
 
-export default clazz => {
+module.exports = clazz => {
   return (id = Symbol()) => {
 
     const populateEvent = event => {
