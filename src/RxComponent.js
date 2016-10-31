@@ -95,7 +95,7 @@ export default clazz => {
       .filter(state => !_.isEmpty(state))
       .distinctUntilChanged(
         _.identity,
-        _.isEqual,
+        _.isEqual
       )
       .share();
 
