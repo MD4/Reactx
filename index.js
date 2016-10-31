@@ -1,3 +1,1 @@
-import Reactx from './src';
-
-export default Reactx;
+module.exports = require('./src');

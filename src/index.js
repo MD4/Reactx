@@ -1,5 +1,5 @@
-import RxComponent from './RxComponent';
+const RxComponent = require('./RxComponent');
 
-export default {
+module.exports = {
   RxComponent
 };

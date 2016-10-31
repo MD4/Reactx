@@ -1,7 +1,7 @@
-import React from 'react';
-import {Subject} from 'rx';
+const React = require('react');
+const {Subject} = require('rx');
 
-import _ from 'lodash';
+const _ = require('lodash');
 
 export default clazz => {
   return (id = Symbol()) => {
