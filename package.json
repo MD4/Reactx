@@ -1,0 +1,30 @@
+{
+  "name": "reactx",
+  "version": "0.0.1",
+  "description": "React & RxJS micro-lib",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MD4/reactx.git"
+  },
+  "keywords": [
+    "react",
+    "rxjs",
+    "stream",
+    "component"
+  ],
+  "author": "MD4",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/MD4/reactx/issues"
+  },
+  "homepage": "https://github.com/MD4/reactx#readme",
+  "dependencies": {
+    "lodash": "^4.16.5",
+    "react": "^15.3.2",
+    "rx": "^4.1.0"
+  }
+}
