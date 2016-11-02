@@ -1,5 +1,5 @@
 const React = require('react');
-const {Subject} = require('rx');
+const {Observable, Subject} = require('rx');
 
 const _ = require('lodash');
 
@@ -72,16 +72,23 @@ module.exports = clazz => {
           ).share()
       );
 
-    const subStreamsToMerge$ = _.values(subStreamsOutputs);
+    const subStreamsToMerge = _.values(subStreamsOutputs);
 
     let stream$ = new Subject();
 
     if (childsStreams.length) {
-      childsStreams.forEach(childsStream$ => (stream$ = stream$.merge(childsStream$)));
+      stream$ = Observable
+        .of(...childsStreams)
+        .mergeAll();
     }
 
-    if (subStreamsToMerge$.length) {
-      subStreamsToMerge$.forEach(subStream$ => (stream$ = stream$.merge(subStream$)));
+    if (subStreamsToMerge.length) {
+      stream$ = Observable
+        .of(
+          stream$,
+          ...subStreamsToMerge
+        )
+        .mergeAll();
     }
 
     rxComponent.stream$ = stream$;
