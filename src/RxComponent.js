@@ -61,8 +61,9 @@ module.exports = clazz => {
           baseSubStreams$[subStreamName](
             subStreams$[subStreamName],
             subStreamsOutputs,
-            events
-          )
+            events,
+            childs
+          ).share()
       );
 
     const subStreamsToMerge$ = _.values(subStreamsOutputs);
@@ -84,7 +85,9 @@ module.exports = clazz => {
       .bind({
         id,
         childs,
-        events
+        events,
+        subStreams$,
+        stream$
       })(
         _.cloneDeep(store),
         event
