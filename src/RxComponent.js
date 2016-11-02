@@ -24,8 +24,11 @@ module.exports = clazz => {
       store = {},
       events: eventsSpec = {},
       reducer:baseReducer = (store, event) => store,
-      subStreams$:baseSubStreams$ = {}
+      subStreams:baseSubStreams = {}
     } = clazz;
+
+
+    const rxComponent = {id, childs, store};
 
     const events = _(eventsSpec)
       .keys()
@@ -37,12 +40,14 @@ module.exports = clazz => {
         {}
       );
 
-    const childsStreams$ = _(childs)
+    rxComponent.events = events;
+
+    const childsStreams = _(childs)
       .values()
       .map('stream$')
       .value();
 
-    const subStreams$ = _(baseSubStreams$)
+    const subStreams = _(baseSubStreams)
       .keys()
       .reduce(
         (memo, subStreamName) => {
@@ -52,17 +57,18 @@ module.exports = clazz => {
         {}
       );
 
+    rxComponent.subStreams = subStreams;
+
     const subStreamsOutputs = {};
 
-    _(subStreams$)
+    _(subStreams)
       .keys()
       .forEach(
         subStreamName => subStreamsOutputs[subStreamName] =
-          baseSubStreams$[subStreamName](
-            subStreams$[subStreamName],
+          baseSubStreams[subStreamName](
+            subStreams[subStreamName],
             subStreamsOutputs,
-            events,
-            childs
+            rxComponent
           ).share()
       );
 
@@ -70,27 +76,23 @@ module.exports = clazz => {
 
     let stream$ = new Subject();
 
-    if (childsStreams$.length) {
-      childsStreams$.forEach(childsStream$ => (stream$ = stream$.merge(childsStream$)));
+    if (childsStreams.length) {
+      childsStreams.forEach(childsStream$ => (stream$ = stream$.merge(childsStream$)));
     }
 
     if (subStreamsToMerge$.length) {
       subStreamsToMerge$.forEach(subStream$ => (stream$ = stream$.merge(subStream$)));
     }
 
+    rxComponent.stream$ = stream$;
+
     const populatedStream$ = stream$
       .map(populateEvent);
 
-    const reducer = (store, event) => baseReducer
-      .bind({
-        id,
-        childs,
-        events,
-        subStreams$,
-        stream$
-      })(
+    const reducer = (store, event) => baseReducer(
         _.cloneDeep(store),
-        event
+        event,
+        rxComponent
       );
 
     const updateStream$ = stream$
@@ -100,6 +102,10 @@ module.exports = clazz => {
         _.identity,
         _.isEqual
       )
+      .map(store => {
+        rxComponent.store = store;
+        return store;
+      })
       .share();
 
     const definition = _.extend(
@@ -113,7 +119,7 @@ module.exports = clazz => {
 
         stream$: populatedStream$,
         updateStream$,
-        subStreams$,
+        subStreams,
 
         getInitialState() {
           return store;
@@ -148,7 +154,7 @@ module.exports = clazz => {
 
     RxComponent.stream$ = populatedStream$;
     RxComponent.updateStream$ = updateStream$;
-    RxComponent.subStreams$ = subStreams$;
+    RxComponent.subStreams = subStreams;
 
     return RxComponent;
 
