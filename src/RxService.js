@@ -1,4 +1,3 @@
-const React = require('react');
 const {Observable, Subject} = require('rx');
 
 const _ = require('lodash');
@@ -24,7 +23,8 @@ module.exports = clazz => {
       store = {},
       events: eventsSpec = {},
       reducer:baseReducer = (store, event) => store,
-      subStreams:baseSubStreams = {}
+      subStreams:baseSubStreams = {},
+      exposes = {}
     } = clazz;
 
 
@@ -52,6 +52,7 @@ module.exports = clazz => {
       .reduce(
         (memo, subStreamName) => {
           memo[subStreamName] = new Subject();
+          memo[subStreamName].subscribe(() => console.log('putain'))
           return memo;
         },
         {}
@@ -117,56 +118,19 @@ module.exports = clazz => {
         return store;
       })
       .share();
+    rxComponent.updateStream$ = updateStream$;
 
-    const definition = _.extend(
+
+    const bindedExposes = exposes(rxComponent);
+
+    _.assign(rxComponent, bindedExposes);
+
+    delete rxComponent.exposes;
+
+    return _.extend(
       _.cloneDeep(clazz),
-      {
-        id,
-        events,
-        store,
-        reducer,
-        childs,
-
-        stream$: populatedStream$,
-        updateStream$,
-        subStreams,
-
-        getInitialState() {
-          return store;
-        },
-
-        componentDidMount() {
-          if (clazz.componentDidMount) {
-            clazz.componentDidMount.apply(this, arguments);
-          }
-          this.subscribtion = updateStream$
-            .forEach(this.setState.bind(this));
-        },
-
-        componentWillUnmount() {
-          if (clazz.componentWillUnmount) {
-            clazz.componentWillUnmount.apply(this, arguments);
-          }
-          this.subscribtion.dispose();
-        }
-
-      }
+      rxComponent
     );
-
-    const RxComponent = React.createClass(definition);
-
-    RxComponent.id = id;
-    RxComponent.events = events;
-    RxComponent.store = store;
-    RxComponent.reducer = reducer;
-    RxComponent.childs = childs;
-    RxComponent.events = events;
-
-    RxComponent.stream$ = populatedStream$;
-    RxComponent.updateStream$ = updateStream$;
-    RxComponent.subStreams = subStreams;
-
-    return RxComponent;
 
   };
 
