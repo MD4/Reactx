@@ -106,10 +106,7 @@ module.exports = (clazz, id) => {
       _.identity,
       _.isEqual
     )
-    .map(store => {
-      rxComponent.store = store;
-      return store;
-    })
+    .map(store => _.assign(rxComponent.store, store))
     .share();
 
   return rxComponent;
